@@ -6,6 +6,8 @@ PROJECT_DIR="$HOME/ss/sdk/RCM/StrategyStudio/group_03_project"
 STRATEGY_NAME="spy_index_arb_strategy"
 # Full strategy path
 STRATEGY_DIR="$PROJECT_DIR/$STRATEGY_NAME"
+# Instance name
+INSTANCE_NAME="TestOneSpyIndexArbStrategy"
 
 cd "$PROJECT_DIR"
 
@@ -22,11 +24,8 @@ cd "$HOME/ss/bt/"
 sleep 1
 
 cd "$HOME/ss/bt/utilities"
-./StrategyCommandLine cmd create_instance TestOneSpyIndexArbStrategy SpyIndexArbStrategy \
+./StrategyCommandLine cmd terminate "$INSTANCE_NAME"
+./StrategyCommandLine cmd create_instance "$INSTANCE_NAME" SpyIndexArbStrategy \
     UIUC SIM-1001-101 dlariviere 1000000 -symbols "SPY"
 ./StrategyCommandLine cmd strategy_instance_list
 ./StrategyCommandLine cmd quit
-
-
-
-

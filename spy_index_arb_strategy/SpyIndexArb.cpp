@@ -22,7 +22,7 @@
     #include "stdafx.h"
 #endif
 
-#include "DiaIndexArb.h"
+#include "SpyIndexArb.h"
 
 #include "FillInfo.h"
 #include "AllEventMsg.h"
@@ -40,20 +40,20 @@ using namespace RCM::StrategyStudio::Utilities;
 
 using namespace std;
 
-DiaIndexArbStrategy::DiaIndexArbStrategy(StrategyID strategyID, const std::string& strategyName, const std::string& groupName):
-    Strategy(strategyID, strategyName, groupName),
-    m_momentum_map(),
-	m_tradeprice_map(),
-    m_instrument_order_id_map(),
-    m_momentum(0),
-    m_aggressiveness(0),
-    m_position_size(100),
-    m_debug_on(true),
-    m_short_window_size(10),
-    m_long_window_size(30),
-	m_dia_last_trade_price(0),
-	m_average_dia_ratio(0.0),
-	m_num_dia_ratio_observations(0)
+SpyIndexArbStrategy::SpyIndexArbStrategy(StrategyID strategyID, const std::string& strategyName, const std::string& groupName):
+    Strategy(strategyID, strategyName, groupName)
+    // m_momentum_map(),
+	// m_tradeprice_map(),
+    // m_instrument_order_id_map(),
+    // m_momentum(0),
+    // m_aggressiveness(0),
+    // m_position_size(100),
+    // m_debug_on(true),
+    // m_short_window_size(10),
+    // m_long_window_size(30),
+	// m_spy_last_trade_price(0),
+	// m_average_spy_ratio(0.0),
+	// m_num_spy_ratio_observations(0)
 {
     //this->set_enabled_pre_open_data_flag(true);
     //this->set_enabled_pre_open_trade_flag(true);
@@ -61,36 +61,36 @@ DiaIndexArbStrategy::DiaIndexArbStrategy(StrategyID strategyID, const std::strin
     //this->set_enabled_post_close_trade_flag(true);
 }
 
-DiaIndexArbStrategy::~DiaIndexArbStrategy()
+SpyIndexArbStrategy::~SpyIndexArbStrategy()
 {
 }
 
-void DiaIndexArbStrategy::OnResetStrategyState()
+void SpyIndexArbStrategy::OnResetStrategyState()
 {
-    m_momentum_map.clear();
-    m_instrument_order_id_map.clear();
-    m_momentum = 0;
+    // m_momentum_map.clear();
+    // m_instrument_order_id_map.clear();
+    // m_momentum = 0;
 }
 
-void DiaIndexArbStrategy::DefineStrategyParams()
+void SpyIndexArbStrategy::DefineStrategyParams()
 {
-    CreateStrategyParamArgs arg1("aggressiveness", STRATEGY_PARAM_TYPE_RUNTIME, VALUE_TYPE_DOUBLE, m_aggressiveness);
-    params().CreateParam(arg1);
+    // CreateStrategyParamArgs arg1("aggressiveness", STRATEGY_PARAM_TYPE_RUNTIME, VALUE_TYPE_DOUBLE, m_aggressiveness);
+    // params().CreateParam(arg1);
 
-    CreateStrategyParamArgs arg2("position_size", STRATEGY_PARAM_TYPE_RUNTIME, VALUE_TYPE_INT, m_position_size);
-    params().CreateParam(arg2);
+    // CreateStrategyParamArgs arg2("position_size", STRATEGY_PARAM_TYPE_RUNTIME, VALUE_TYPE_INT, m_position_size);
+    // params().CreateParam(arg2);
 
-    CreateStrategyParamArgs arg3("short_window_size", STRATEGY_PARAM_TYPE_STARTUP, VALUE_TYPE_INT, m_short_window_size);
-    params().CreateParam(arg3);
+    // CreateStrategyParamArgs arg3("short_window_size", STRATEGY_PARAM_TYPE_STARTUP, VALUE_TYPE_INT, m_short_window_size);
+    // params().CreateParam(arg3);
     
-    CreateStrategyParamArgs arg4("long_window_size", STRATEGY_PARAM_TYPE_STARTUP, VALUE_TYPE_INT, m_long_window_size);
-    params().CreateParam(arg4);
+    // CreateStrategyParamArgs arg4("long_window_size", STRATEGY_PARAM_TYPE_STARTUP, VALUE_TYPE_INT, m_long_window_size);
+    // params().CreateParam(arg4);
     
-    CreateStrategyParamArgs arg5("debug", STRATEGY_PARAM_TYPE_RUNTIME, VALUE_TYPE_BOOL, m_debug_on);
-    params().CreateParam(arg5);
+    // CreateStrategyParamArgs arg5("debug", STRATEGY_PARAM_TYPE_RUNTIME, VALUE_TYPE_BOOL, m_debug_on);
+    // params().CreateParam(arg5);
 }
 
-void DiaIndexArbStrategy::DefineStrategyCommands()
+void SpyIndexArbStrategy::DefineStrategyCommands()
 {
     StrategyCommand command1(1, "Reprice Existing Orders");
     commands().AddCommand(command1);
@@ -99,14 +99,14 @@ void DiaIndexArbStrategy::DefineStrategyCommands()
     commands().AddCommand(command2);
 }
 
-void DiaIndexArbStrategy::RegisterForStrategyEvents(StrategyEventRegister* eventRegister, DateType currDate)
+void SpyIndexArbStrategy::RegisterForStrategyEvents(StrategyEventRegister* eventRegister, DateType currDate)
 {    
     for (SymbolSetConstIter it = symbols_begin(); it != symbols_end(); ++it)
     {
         eventRegister->RegisterForBars(*it, BAR_TYPE_TIME, 10);
     }
 }
-void DiaIndexArbStrategy::OnTrade(const TradeDataEventMsg& msg)
+void SpyIndexArbStrategy::OnTrade(const TradeDataEventMsg& msg)
 {
 	std::cout << "OnTrade(): (" << msg.adapter_time() << "): " << msg.instrument().symbol() << ": " << msg.trade().size() << " @ $" << msg.trade().price(); // << std::endl;
 	/*
@@ -116,50 +116,50 @@ void DiaIndexArbStrategy::OnTrade(const TradeDataEventMsg& msg)
 				std::endl;
 	*/
 
-	//add latest price to the map
-	if ( msg.instrument().symbol().compare("DIA")!=0)
-	{
-		m_tradeprice_map[msg.instrument().symbol()] = msg.trade().price();
-	}
-	else
-	{
-		m_dia_last_trade_price = msg.trade().price();
-	}
-//	std::cout << "\t Dumping all symbols; has " << m_tradeprice_map.size() << "elements" << std::endl;
+// 	//add latest price to the map
+// 	if ( msg.instrument().symbol().compare("DIA")!=0)
+// 	{
+// 		m_tradeprice_map[msg.instrument().symbol()] = msg.trade().price();
+// 	}
+// 	else
+// 	{
+// 		m_spy_last_trade_price = msg.trade().price();
+// 	}
+// //	std::cout << "\t Dumping all symbols; has " << m_tradeprice_map.size() << "elements" << std::endl;
 
 
-	double djia_index = 0;
-	for (TradePriceMapIterator iter = m_tradeprice_map.begin(); iter!=m_tradeprice_map.end(); ++iter)
-	{
-//		std::cout << "\t\t" << (iter->first) << ": $" << iter->second << std::endl;
-		djia_index += iter->second;
-	}
+// 	double djia_index = 0;
+// 	for (TradePriceMapIterator iter = m_tradeprice_map.begin(); iter!=m_tradeprice_map.end(); ++iter)
+// 	{
+// //		std::cout << "\t\t" << (iter->first) << ": $" << iter->second << std::endl;
+// 		djia_index += iter->second;
+// 	}
 
-	if (m_dia_last_trade_price!=0 and m_tradeprice_map.size()==31)
-	{
-		double ratio = djia_index / m_dia_last_trade_price;
+// 	if (m_spy_last_trade_price!=0 and m_tradeprice_map.size()==31)
+// 	{
+// 		double ratio = djia_index / m_spy_last_trade_price;
 
-		//update average ratio stats
-		double new_average_ratio = ((m_average_dia_ratio*m_num_dia_ratio_observations) + ratio) / (m_num_dia_ratio_observations+1);
+// 		//update average ratio stats
+// 		double new_average_ratio = ((m_average_spy_ratio*m_num_spy_ratio_observations) + ratio) / (m_num_spy_ratio_observations+1);
 
 
-		std::cout << "; \t Dumping all symbols; " << // << m_tradeprice_map.size() << "elements; " <<
-				"sum is " << djia_index <<
-				" DIA last trade price is $" << m_dia_last_trade_price <<
-				" ratio is " << ratio << //<< std::endl;
-				" previous average ratio was " << m_average_dia_ratio <<
-				" new average ratio is " << new_average_ratio;
+// 		std::cout << "; \t Dumping all symbols; " << // << m_tradeprice_map.size() << "elements; " <<
+// 				"sum is " << djia_index <<
+// 				" DIA last trade price is $" << m_spy_last_trade_price <<
+// 				" ratio is " << ratio << //<< std::endl;
+// 				" previous average ratio was " << m_average_spy_ratio <<
+// 				" new average ratio is " << new_average_ratio;
 
-		m_average_dia_ratio = new_average_ratio;
-		m_num_dia_ratio_observations++;
-	}
-	std::cout << std::endl;
+// 		m_average_spy_ratio = new_average_ratio;
+// 		m_num_spy_ratio_observations++;
+// 	}
+// 	std::cout << std::endl;
 
 }
 
 //TODO: need to fix the data source to get these three callbacks working
 
-void DiaIndexArbStrategy::OnTopQuote(const QuoteEventMsg& msg)
+void SpyIndexArbStrategy::OnTopQuote(const QuoteEventMsg& msg)
 {
 	std::cout << "OnTopQuote(): (" << msg.adapter_time() << "): " << msg.instrument().symbol() << ": " <<
 		msg.instrument().top_quote().bid_size() << " @ $"<< msg.instrument().top_quote().bid() <<
@@ -168,7 +168,7 @@ void DiaIndexArbStrategy::OnTopQuote(const QuoteEventMsg& msg)
 
 }
 
-void DiaIndexArbStrategy::OnQuote(const QuoteEventMsg& msg)
+void SpyIndexArbStrategy::OnQuote(const QuoteEventMsg& msg)
 {
 	std::cout << "OnQuote(): (" << msg.adapter_time() << "): " << msg.instrument().symbol() << ": " <<
 			msg.instrument().top_quote().bid_size() << " @ $"<< msg.instrument().top_quote().bid() <<
@@ -176,7 +176,7 @@ void DiaIndexArbStrategy::OnQuote(const QuoteEventMsg& msg)
 			std::endl;
 }
 
-void DiaIndexArbStrategy::OnDepth(const MarketDepthEventMsg& msg)
+void SpyIndexArbStrategy::OnDepth(const MarketDepthEventMsg& msg)
 {
 	std::cout << "OnDepth(): (" << msg.adapter_time() << "): " << msg.instrument().symbol() << ": " <<
 				msg.instrument().top_quote().bid_size() << " @ $"<< msg.instrument().top_quote().bid() <<
@@ -184,7 +184,7 @@ void DiaIndexArbStrategy::OnDepth(const MarketDepthEventMsg& msg)
 				std::endl;
 }
 
-void DiaIndexArbStrategy::OnBar(const BarEventMsg& msg)
+void SpyIndexArbStrategy::OnBar(const BarEventMsg& msg)
 {
 	
     if (m_debug_on) {
@@ -197,35 +197,35 @@ void DiaIndexArbStrategy::OnBar(const BarEventMsg& msg)
     if(msg.bar().close() < .01) return;
 
 
-    //check if we're already tracking the momentum object for this instrument, if not create a new one
-    MomentumMapIterator iter = m_momentum_map.find(&msg.instrument());
-    if (iter != m_momentum_map.end()) {
-        m_momentum = &iter->second;
-    } else {
-        m_momentum = &m_momentum_map.insert(make_pair(&msg.instrument(),Momentum(m_short_window_size,m_long_window_size))).first->second;
-    }
+//     //check if we're already tracking the momentum object for this instrument, if not create a new one
+//     MomentumMapIterator iter = m_momentum_map.find(&msg.instrument());
+//     if (iter != m_momentum_map.end()) {
+//         m_momentum = &iter->second;
+//     } else {
+//         m_momentum = &m_momentum_map.insert(make_pair(&msg.instrument(),Momentum(m_short_window_size,m_long_window_size))).first->second;
+//     }
 
-    DesiredPositionSide side = m_momentum->Update(msg.bar().close());
+//     DesiredPositionSide side = m_momentum->Update(msg.bar().close());
     
-    if(m_momentum->FullyInitialized()) {
-//        AdjustPortfolio(&msg.instrument(), m_position_size * side);
-    }
+//     if(m_momentum->FullyInitialized()) {
+// //        AdjustPortfolio(&msg.instrument(), m_position_size * side);
+//     }
     
 }
 
-void DiaIndexArbStrategy::OnOrderUpdate(const OrderUpdateEventMsg& msg)
+void SpyIndexArbStrategy::OnOrderUpdate(const OrderUpdateEventMsg& msg)
 {    
 	std::cout << "OnOrderUpdate(): " << msg.update_time() << msg.name() << std::endl;
-    if(msg.completes_order())
-    {
-		m_instrument_order_id_map[msg.order().instrument()] = 0;
-		std::cout << "OnOrderUpdate(): order is complete; " << std::endl;
-    }
+    // if(msg.completes_order())
+    // {
+	// 	m_instrument_order_id_map[msg.order().instrument()] = 0;
+	// 	std::cout << "OnOrderUpdate(): order is complete; " << std::endl;
+    // }
 }
 
 
 
-void DiaIndexArbStrategy::OnStrategyCommand(const StrategyCommandEventMsg& msg)
+void SpyIndexArbStrategy::OnStrategyCommand(const StrategyCommandEventMsg& msg)
 {
     switch (msg.command_id()) {
         case 1:
@@ -240,7 +240,7 @@ void DiaIndexArbStrategy::OnStrategyCommand(const StrategyCommandEventMsg& msg)
     }
 }
 
-void DiaIndexArbStrategy::OnParamChanged(StrategyParam& param)
+void SpyIndexArbStrategy::OnParamChanged(StrategyParam& param)
 {    
 	/*
     if (param.param_name() == "aggressiveness") {                         

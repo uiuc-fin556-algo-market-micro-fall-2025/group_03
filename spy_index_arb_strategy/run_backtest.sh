@@ -36,7 +36,7 @@ if ! [[ "$startDate" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ && "$endDate" =~ ^[0-9]{4}-
     usage
 fi
 
-instanceName='TestOneDiaIndexArbStrategy'
+instanceName='TestOneSpyIndexArbStrategy'
 
 (cd "$HOME/ss/bt" && ./StrategyServerBacktesting &)
 

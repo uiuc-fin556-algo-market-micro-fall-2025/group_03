@@ -77,7 +77,7 @@ public:
     Analytics::ScalarRollingWindow<double> m_longWindow;
 };
 
-class DiaIndexArbStrategy : public Strategy {
+class SpyIndexArbStrategy : public Strategy {
 public:
     typedef boost::unordered_map<const Instrument*, Momentum> MomentumMap; 
     typedef MomentumMap::iterator MomentumMapIterator;
@@ -86,8 +86,8 @@ public:
     typedef TradePriceMap::iterator TradePriceMapIterator;
 
 public:
-    DiaIndexArbStrategy(StrategyID strategyID, const std::string& strategyName, const std::string& groupName);
-    ~DiaIndexArbStrategy();
+    SpyIndexArbStrategy(StrategyID strategyID, const std::string& strategyName, const std::string& groupName);
+    ~SpyIndexArbStrategy();
 
 public: /* from IEventCallback */
 
@@ -187,9 +187,9 @@ private:
     TradePriceMap m_tradeprice_map;
 //    boost::unordered_map<std::string, double> m_tradeprice_map;
     Momentum* m_momentum;
-    double m_dia_last_trade_price;
-    double m_average_dia_ratio;
-    int m_num_dia_ratio_observations;
+    double m_spy_last_trade_price;
+    double m_average_spy_ratio;
+    int m_num_spy_ratio_observations;
     double m_max_notional;
     double m_aggressiveness;
     int m_position_size;
@@ -202,7 +202,7 @@ extern "C" {
 
     _STRATEGY_EXPORTS const char* GetType()
     {
-        return "DiaIndexArbStrategy";
+        return "SpyIndexArbStrategy";
     }
 
     _STRATEGY_EXPORTS IStrategy* CreateStrategy(const char* strategyType, 
@@ -211,7 +211,7 @@ extern "C" {
                                    const char* groupName)
     {
         if (strcmp(strategyType,GetType()) == 0) {
-            return *(new DiaIndexArbStrategy(strategyID, strategyName, groupName));
+            return *(new SpyIndexArbStrategy(strategyID, strategyName, groupName));
         } else {
             return NULL;
         }

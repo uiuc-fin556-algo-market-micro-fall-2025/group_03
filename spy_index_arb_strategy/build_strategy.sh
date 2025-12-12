@@ -22,7 +22,7 @@ cd "$HOME/ss/bt/"
 sleep 1
 
 cd "$HOME/ss/bt/utilities"
-./StrategyCommandLine cmd create_instance TestOneDiaIndexArbStrategy DiaIndexArbStrategy \
+./StrategyCommandLine cmd create_instance TestOneSpyIndexArbStrategy SpyIndexArbStrategy \
     UIUC SIM-1001-101 dlariviere 1000000 -symbols "SPY"
 ./StrategyCommandLine cmd strategy_instance_list
 ./StrategyCommandLine cmd quit

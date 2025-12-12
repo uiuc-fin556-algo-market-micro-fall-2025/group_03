@@ -16,10 +16,10 @@ INCLUDEPATH=../../includes
 
 INCLUDES=-I/usr/include -I$(INCLUDEPATH)
 LDFLAGS=$(LIBPATH)/libstrategystudio_analytics.a $(LIBPATH)/libstrategystudio.a $(LIBPATH)/libstrategystudio_transport.a $(LIBPATH)/libstrategystudio_marketmodels.a $(LIBPATH)/libstrategystudio_utilities.a $(LIBPATH)/libstrategystudio_flashprotocol.a
-LIBRARY=DiaIndexArb.so
+LIBRARY=SpyIndexArb.so
 
-SOURCES=DiaIndexArb.cpp
-HEADERS=DiaIndexArb.h
+SOURCES=SpyIndexArb.cpp
+HEADERS=SpyIndexArb.h
  
 OBJECTS=$(SOURCES:.cpp=.o)
 
@@ -38,8 +38,8 @@ copy_strategy: all
 	cp $(LIBRARY) ~/ss/bt/strategies_dlls/.
 
 launch_backtest: 
-	#cd ~/Desktop/strategy_studio/backtesting/utilities ; ./StrategyCommandLine cmd start_backtest 2021-11-05 2021-11-05 TestTwoDiaIndexArbStrategy 1
-	cd ~/ss/bt/utilities ; ./StrategyCommandLine cmd start_backtest 2021-11-05 2021-11-05 TestOneDiaIndexArbStrategy 1
+# 	cd ~/Desktop/strategy_studio/backtesting/utilities ; ./StrategyCommandLine cmd start_backtest 2021-11-05 2021-11-05 TestTwoSpyIndexArbStrategy 1
+	cd ~/ss/bt/utilities ; ./StrategyCommandLine cmd start_backtest 2021-11-05 2021-11-05 TestOneSpyIndexArbStrategy 1
 
 run_backtest: all
 	cd ~/Downloads/ss_backtesting ; echo $PWD ; ./run_backtest.sh

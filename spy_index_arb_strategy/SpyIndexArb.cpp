@@ -41,24 +41,9 @@ using namespace RCM::StrategyStudio::Utilities;
 using namespace std;
 
 SpyIndexArbStrategy::SpyIndexArbStrategy(StrategyID strategyID, const std::string& strategyName, const std::string& groupName):
-    Strategy(strategyID, strategyName, groupName)
-    // m_momentum_map(),
-	// m_tradeprice_map(),
-    // m_instrument_order_id_map(),
-    // m_momentum(0),
-    // m_aggressiveness(0),
-    // m_position_size(100),
-    // m_debug_on(true),
-    // m_short_window_size(10),
-    // m_long_window_size(30),
-	// m_spy_last_trade_price(0),
-	// m_average_spy_ratio(0.0),
-	// m_num_spy_ratio_observations(0)
+    Strategy(strategyID, strategyName, groupName),
+    spy_instrument(nullptr)
 {
-    //this->set_enabled_pre_open_data_flag(true);
-    //this->set_enabled_pre_open_trade_flag(true);
-    //this->set_enabled_post_close_data_flag(true);
-    //this->set_enabled_post_close_trade_flag(true);
 }
 
 SpyIndexArbStrategy::~SpyIndexArbStrategy()
@@ -67,47 +52,56 @@ SpyIndexArbStrategy::~SpyIndexArbStrategy()
 
 void SpyIndexArbStrategy::OnResetStrategyState()
 {
-    // m_momentum_map.clear();
-    // m_instrument_order_id_map.clear();
-    // m_momentum = 0;
 }
 
 void SpyIndexArbStrategy::DefineStrategyParams()
 {
-    // CreateStrategyParamArgs arg1("aggressiveness", STRATEGY_PARAM_TYPE_RUNTIME, VALUE_TYPE_DOUBLE, m_aggressiveness);
-    // params().CreateParam(arg1);
-
-    // CreateStrategyParamArgs arg2("position_size", STRATEGY_PARAM_TYPE_RUNTIME, VALUE_TYPE_INT, m_position_size);
-    // params().CreateParam(arg2);
-
-    // CreateStrategyParamArgs arg3("short_window_size", STRATEGY_PARAM_TYPE_STARTUP, VALUE_TYPE_INT, m_short_window_size);
-    // params().CreateParam(arg3);
-    
-    // CreateStrategyParamArgs arg4("long_window_size", STRATEGY_PARAM_TYPE_STARTUP, VALUE_TYPE_INT, m_long_window_size);
-    // params().CreateParam(arg4);
-    
-    // CreateStrategyParamArgs arg5("debug", STRATEGY_PARAM_TYPE_RUNTIME, VALUE_TYPE_BOOL, m_debug_on);
-    // params().CreateParam(arg5);
 }
 
 void SpyIndexArbStrategy::DefineStrategyCommands()
 {
-    StrategyCommand command1(1, "Reprice Existing Orders");
-    commands().AddCommand(command1);
-
-    StrategyCommand command2(2, "Cancel All Orders");
-    commands().AddCommand(command2);
 }
 
 void SpyIndexArbStrategy::RegisterForStrategyEvents(StrategyEventRegister* eventRegister, DateType currDate)
 {    
-    for (SymbolSetConstIter it = symbols_begin(); it != symbols_end(); ++it)
-    {
-        eventRegister->RegisterForBars(*it, BAR_TYPE_TIME, 10);
+    for (InstrumentSetConstIter it = instrument_begin(); it != instrument_end(); ++it) {
+        if (it->second->symbol().compare("SPY")==0) {
+            spy_instrument = it->second;
+        }
     }
 }
 void SpyIndexArbStrategy::OnTrade(const TradeDataEventMsg& msg)
 {
+    // msg.instrument() is const, so grab its ID
+    const Instrument* instrument = &msg.instrument();
+    if (instrument->symbol().compare("SPY")==0) {
+        return;
+    }
+
+    int quantity = 1;   // any quantity you want
+
+    // Choose a price. For market orders, this value is usually ignored, but StrategyStudio still requires it.
+    double px = instrument->last_trade().price();
+    if (px <= 0) px = instrument->top_quote().ask();
+
+    // Pick a market center depending on instrument type
+    MarketCenterID mcid = MARKET_CENTER_ID_IEX;
+
+    // Take same side as trade
+    OrderSide side = msg.side() == TRADE_SIDE_BUY ? ORDER_SIDE_BUY : ORDER_SIDE_SELL;
+
+    OrderParams params(
+        *spy_instrument,
+        quantity,
+        px,
+        mcid,
+        side,
+        ORDER_TIF_DAY,
+        ORDER_TYPE_MARKET
+    );
+
+    trade_actions()->SendNewOrder(params);
+
 	// std::cout << "OnTrade(): (" << msg.adapter_time() << "): " << msg.instrument().symbol() << ": " << msg.trade().size() << " @ $" << msg.trade().price() << '\n';
 	/*
 	std::cout << "\t " <<
@@ -115,49 +109,7 @@ void SpyIndexArbStrategy::OnTrade(const TradeDataEventMsg& msg)
 				msg.instrument().top_quote().ask_size() << " @ $"<< msg.instrument().top_quote().ask() <<
 				std::endl;
 	*/
-
-// 	//add latest price to the map
-// 	if ( msg.instrument().symbol().compare("DIA")!=0)
-// 	{
-// 		m_tradeprice_map[msg.instrument().symbol()] = msg.trade().price();
-// 	}
-// 	else
-// 	{
-// 		m_spy_last_trade_price = msg.trade().price();
-// 	}
-// //	std::cout << "\t Dumping all symbols; has " << m_tradeprice_map.size() << "elements" << std::endl;
-
-
-// 	double djia_index = 0;
-// 	for (TradePriceMapIterator iter = m_tradeprice_map.begin(); iter!=m_tradeprice_map.end(); ++iter)
-// 	{
-// //		std::cout << "\t\t" << (iter->first) << ": $" << iter->second << std::endl;
-// 		djia_index += iter->second;
-// 	}
-
-// 	if (m_spy_last_trade_price!=0 and m_tradeprice_map.size()==31)
-// 	{
-// 		double ratio = djia_index / m_spy_last_trade_price;
-
-// 		//update average ratio stats
-// 		double new_average_ratio = ((m_average_spy_ratio*m_num_spy_ratio_observations) + ratio) / (m_num_spy_ratio_observations+1);
-
-
-// 		std::cout << "; \t Dumping all symbols; " << // << m_tradeprice_map.size() << "elements; " <<
-// 				"sum is " << djia_index <<
-// 				" DIA last trade price is $" << m_spy_last_trade_price <<
-// 				" ratio is " << ratio << //<< std::endl;
-// 				" previous average ratio was " << m_average_spy_ratio <<
-// 				" new average ratio is " << new_average_ratio;
-
-// 		m_average_spy_ratio = new_average_ratio;
-// 		m_num_spy_ratio_observations++;
-// 	}
-// 	std::cout << std::endl;
-
 }
-
-//TODO: need to fix the data source to get these three callbacks working
 
 void SpyIndexArbStrategy::OnTopQuote(const QuoteEventMsg& msg)
 {
@@ -186,78 +138,19 @@ void SpyIndexArbStrategy::OnDepth(const MarketDepthEventMsg& msg)
 
 void SpyIndexArbStrategy::OnBar(const BarEventMsg& msg)
 {
-	
-    // if (m_debug_on) {
-    //     ostringstream str;
-    //     str << "FINDME" << msg.instrument().symbol() << ": " << msg.bar();
-    //     logger().LogToClient(LOGLEVEL_DEBUG, str.str().c_str());
-    //     //std::cout << str.str().c_str() << std::endl;
-    // }
-
-    if(msg.bar().close() < .01) return;
-
-
-//     //check if we're already tracking the momentum object for this instrument, if not create a new one
-//     MomentumMapIterator iter = m_momentum_map.find(&msg.instrument());
-//     if (iter != m_momentum_map.end()) {
-//         m_momentum = &iter->second;
-//     } else {
-//         m_momentum = &m_momentum_map.insert(make_pair(&msg.instrument(),Momentum(m_short_window_size,m_long_window_size))).first->second;
-//     }
-
-//     DesiredPositionSide side = m_momentum->Update(msg.bar().close());
-    
-//     if(m_momentum->FullyInitialized()) {
-// //        AdjustPortfolio(&msg.instrument(), m_position_size * side);
-//     }
-    
 }
 
 void SpyIndexArbStrategy::OnOrderUpdate(const OrderUpdateEventMsg& msg)
 {    
 	// std::cout << "OnOrderUpdate(): " << msg.update_time() << msg.name() << std::endl;
-    // if(msg.completes_order())
-    // {
-	// 	m_instrument_order_id_map[msg.order().instrument()] = 0;
-	// 	std::cout << "OnOrderUpdate(): order is complete; " << std::endl;
-    // }
 }
 
 
 
 void SpyIndexArbStrategy::OnStrategyCommand(const StrategyCommandEventMsg& msg)
 {
-    switch (msg.command_id()) {
-        case 1:
-//            RepriceAll();
-            break;
-        case 2:
-            trade_actions()->SendCancelAll();
-            break;
-        default:
-            logger().LogToClient(LOGLEVEL_DEBUG, "Unknown strategy command received");
-            break;
-    }
 }
 
 void SpyIndexArbStrategy::OnParamChanged(StrategyParam& param)
 {    
-	/*
-    if (param.param_name() == "aggressiveness") {                         
-        if (!param.Get(&m_aggressiveness))
-            throw StrategyStudioException("Could not get m_aggressiveness");
-    } else if (param.param_name() == "position_size") {
-        if (!param.Get(&m_position_size))
-            throw StrategyStudioException("Could not get position size");
-    } else if (param.param_name() == "short_window_size") {
-        if (!param.Get(&m_short_window_size))
-            throw StrategyStudioException("Could not get trade size");
-    } else if (param.param_name() == "long_window_size") {
-        if (!param.Get(&m_long_window_size))
-            throw StrategyStudioException("Could not get long_window_size");
-    } else if (param.param_name() == "debug") {
-        if (!param.Get(&m_debug_on))
-            throw StrategyStudioException("Could not get trade size");
-    } 
-    */
 }

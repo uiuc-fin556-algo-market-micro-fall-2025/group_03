@@ -182,20 +182,7 @@ private: /* from Strategy */
     virtual void DefineStrategyCommands();
 
 private:
-    boost::unordered_map<const Instrument*, Momentum> m_momentum_map;
-    boost::unordered_map<const Instrument*, OrderID> m_instrument_order_id_map;
-    TradePriceMap m_tradeprice_map;
-//    boost::unordered_map<std::string, double> m_tradeprice_map;
-    Momentum* m_momentum;
-    double m_spy_last_trade_price;
-    double m_average_spy_ratio;
-    int m_num_spy_ratio_observations;
-    double m_max_notional;
-    double m_aggressiveness;
-    int m_position_size;
-    int m_short_window_size;
-    int m_long_window_size;
-    bool m_debug_on;
+    const Instrument* spy_instrument;
 };
 
 extern "C" {

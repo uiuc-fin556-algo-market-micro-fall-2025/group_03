@@ -108,7 +108,7 @@ void SpyIndexArbStrategy::RegisterForStrategyEvents(StrategyEventRegister* event
 }
 void SpyIndexArbStrategy::OnTrade(const TradeDataEventMsg& msg)
 {
-	std::cout << "OnTrade(): (" << msg.adapter_time() << "): " << msg.instrument().symbol() << ": " << msg.trade().size() << " @ $" << msg.trade().price(); // << std::endl;
+	// std::cout << "OnTrade(): (" << msg.adapter_time() << "): " << msg.instrument().symbol() << ": " << msg.trade().size() << " @ $" << msg.trade().price() << '\n';
 	/*
 	std::cout << "\t " <<
 				msg.instrument().top_quote().bid_size() << " @ $"<< msg.instrument().top_quote().bid() <<
@@ -161,38 +161,38 @@ void SpyIndexArbStrategy::OnTrade(const TradeDataEventMsg& msg)
 
 void SpyIndexArbStrategy::OnTopQuote(const QuoteEventMsg& msg)
 {
-	std::cout << "OnTopQuote(): (" << msg.adapter_time() << "): " << msg.instrument().symbol() << ": " <<
-		msg.instrument().top_quote().bid_size() << " @ $"<< msg.instrument().top_quote().bid() <<
-		msg.instrument().top_quote().ask_size() << " @ $"<< msg.instrument().top_quote().ask() <<
-		std::endl;
+	// std::cout << "OnTopQuote(): (" << msg.adapter_time() << "): " << msg.instrument().symbol() << ": " <<
+	// 	msg.instrument().top_quote().bid_size() << " @ $"<< msg.instrument().top_quote().bid() << ", " <<
+	// 	msg.instrument().top_quote().ask_size() << " @ $"<< msg.instrument().top_quote().ask() <<
+	// 	'\n';
 
 }
 
 void SpyIndexArbStrategy::OnQuote(const QuoteEventMsg& msg)
 {
-	std::cout << "OnQuote(): (" << msg.adapter_time() << "): " << msg.instrument().symbol() << ": " <<
-			msg.instrument().top_quote().bid_size() << " @ $"<< msg.instrument().top_quote().bid() <<
-			msg.instrument().top_quote().ask_size() << " @ $"<< msg.instrument().top_quote().ask() <<
-			std::endl;
+	// std::cout << "OnQuote(): (" << msg.adapter_time() << "): " << msg.instrument().symbol() << ": " <<
+    //     msg.instrument().top_quote().bid_size() << " @ $"<< msg.instrument().top_quote().bid() << ", " <<
+    //     msg.instrument().top_quote().ask_size() << " @ $"<< msg.instrument().top_quote().ask() <<
+    //     '\n';
 }
 
 void SpyIndexArbStrategy::OnDepth(const MarketDepthEventMsg& msg)
 {
-	std::cout << "OnDepth(): (" << msg.adapter_time() << "): " << msg.instrument().symbol() << ": " <<
-				msg.instrument().top_quote().bid_size() << " @ $"<< msg.instrument().top_quote().bid() <<
-				msg.instrument().top_quote().ask_size() << " @ $"<< msg.instrument().top_quote().ask() <<
-				std::endl;
+	// std::cout << "OnDepth(): (" << msg.adapter_time() << "): " << msg.instrument().symbol() << ": " <<
+    //     msg.instrument().top_quote().bid_size() << " @ $"<< msg.instrument().top_quote().bid() << ", " <<
+    //     msg.instrument().top_quote().ask_size() << " @ $"<< msg.instrument().top_quote().ask() <<
+    //     '\n';
 }
 
 void SpyIndexArbStrategy::OnBar(const BarEventMsg& msg)
 {
 	
-    if (m_debug_on) {
-        ostringstream str;
-        str << "FINDME" << msg.instrument().symbol() << ": " << msg.bar();
-        logger().LogToClient(LOGLEVEL_DEBUG, str.str().c_str());
-        //std::cout << str.str().c_str() << std::endl;
-    }
+    // if (m_debug_on) {
+    //     ostringstream str;
+    //     str << "FINDME" << msg.instrument().symbol() << ": " << msg.bar();
+    //     logger().LogToClient(LOGLEVEL_DEBUG, str.str().c_str());
+    //     //std::cout << str.str().c_str() << std::endl;
+    // }
 
     if(msg.bar().close() < .01) return;
 
@@ -215,7 +215,7 @@ void SpyIndexArbStrategy::OnBar(const BarEventMsg& msg)
 
 void SpyIndexArbStrategy::OnOrderUpdate(const OrderUpdateEventMsg& msg)
 {    
-	std::cout << "OnOrderUpdate(): " << msg.update_time() << msg.name() << std::endl;
+	// std::cout << "OnOrderUpdate(): " << msg.update_time() << msg.name() << std::endl;
     // if(msg.completes_order())
     // {
 	// 	m_instrument_order_id_map[msg.order().instrument()] = 0;

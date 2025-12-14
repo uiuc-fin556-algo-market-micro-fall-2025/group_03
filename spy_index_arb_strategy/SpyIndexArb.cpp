@@ -80,9 +80,8 @@ void SpyIndexArbStrategy::OnTrade(const TradeDataEventMsg& msg)
 
     int quantity = 1;   // any quantity you want
 
-    // Choose a price. For market orders, this value is usually ignored, but StrategyStudio still requires it.
-    double px = instrument->last_trade().price();
-    if (px <= 0) px = instrument->top_quote().ask();
+    // Take price just better than than current top of book
+    double px = msg.side() == TRADE_SIDE_BUY ? instrument->top_quote().bid()+0.01 : instrument->top_quote().ask()-0.01;
 
     // Pick a market center depending on instrument type
     MarketCenterID mcid = MARKET_CENTER_ID_IEX;
@@ -97,7 +96,7 @@ void SpyIndexArbStrategy::OnTrade(const TradeDataEventMsg& msg)
         mcid,
         side,
         ORDER_TIF_DAY,
-        ORDER_TYPE_MARKET
+        ORDER_TYPE_LIMIT
     );
 
     trade_actions()->SendNewOrder(params);

@@ -50,6 +50,11 @@ enum DesiredPositionSide {
     DESIRED_POSITION_SIDE_LONG=1
 };
 
+enum TradeDirection {
+    TRADE_BUY,
+    TRADE_SELL
+};
+
 class Momentum {
 public:
     
@@ -182,7 +187,27 @@ private: /* from Strategy */
     virtual void DefineStrategyCommands();
 
 private:
-    const Instrument* spy_instrument;
+    void ExecuteTrade(double z);
+    void SendOrder(const Instrument* instrument, int quantity, TradeDirection direction);
+
+    // Instruments
+    const Instrument* spy_instrument_;
+    boost::unordered_map<std::string, const Instrument*> underlyings_;
+
+    // Prices
+    boost::unordered_map<std::string, double> last_price_;
+    boost::unordered_map<std::string, double> ref_price_;
+
+    // Weights
+    boost::unordered_map<std::string, double> weights_;
+
+    // Rolling delta Z-score
+    Analytics::ScalarRollingWindow<double> rolling_delta_;
+
+    // Params
+    double z_score_threshold_;
+    int position_size_;
+    bool debug_;
 };
 
 extern "C" {

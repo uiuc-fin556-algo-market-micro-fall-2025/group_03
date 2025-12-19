@@ -26,6 +26,6 @@ sleep 1
 cd "$HOME/ss/bt/utilities"
 ./StrategyCommandLine cmd terminate "$INSTANCE_NAME"
 ./StrategyCommandLine cmd create_instance "$INSTANCE_NAME" SpyIndexArbStrategy \
-    UIUC SIM-1001-101 dlariviere 1000000 -symbols "SPY|MSFT"
+    UIUC SIM-1001-101 dlariviere 1000000 -symbols "SPY|MSFT|NVDA|AMZN|GOOG"
 ./StrategyCommandLine cmd strategy_instance_list
 ./StrategyCommandLine cmd quit

@@ -36,6 +36,8 @@ if ! [[ "$startDate" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ && "$endDate" =~ ^[0-9]{4}-
     usage
 fi
 
+logFileNumLines=$(wc -l < "$HOME/ss/bt/logs/main_log.txt")
+
 instanceName='TestOneSpyIndexArbStrategy'
 
 (cd "$HOME/ss/bt" && ./StrategyServerBacktesting &)
@@ -53,14 +55,35 @@ foundFinishedLogFile=$(grep -nr "finished.$" "$HOME/ss/bt/logs/main_log.txt" | g
 echo "Last line found: $foundFinishedLogFile"
 
 # Wait for strategy to finish
-while ((logFileNumLines > foundFinishedLogFile)); do
-    foundFinishedLogFile=$(grep -nr "finished.$" "$HOME/ss/bt/logs/main_log.txt" | gawk '{print $1}' FS=":" | tail -1)
+while ((logFileNumLines >= foundFinishedLogFile)); do
     echo "Waiting for strategy to finish"
-    sleep 1
+    sleep 10
+    foundFinishedLogFile=$(grep -nr "finished.$" "$HOME/ss/bt/logs/main_log.txt" | gawk '{print $1}' FS=":" | tail -1)
+    echo "Last line found: $foundFinishedLogFile"
 done
 
-echo "Sleeping for 10 seconds..."
-sleep 10
+echo "Sleeping for 2 seconds..."
+sleep 2
+
+# Get the latest file in terms of modified time
+latestCRA=$(ls -t "$HOME/ss/bt/backtesting-results" | head -1)
+
+#DEBUGGING OUTPUT
+echo "latest CRA File is: $latestCRA"
+
+# Run the export command to generate csv files
+cd "$HOME/ss/bt/utilities"
+./StrategyCommandLine cmd export_cra_file backtesting-results/$latestCRA backtesting-cra-exports
+./StrategyCommandLine cmd quit
+
+# print PnL
+cd "$HOME/ss/bt/backtesting-cra-exports"
+latestPnL=$(ls -t *pnl* | head -1)
+tail -1 "$latestPnL"
+
+# Generate portfolio metric
+# cd /home/vagrant/Desktop/strategy_studio/backtesting/utilities
+# python /home/vagrant/Desktop/strategy_studio/localdev/RCM/StrategyStudio/examples/fin566_fall_2020_group_three/metrics/calc_metric.py 
 
 echo "run_backtest.sh: Strategy Studio finished backtesting"
 

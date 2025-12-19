@@ -44,7 +44,7 @@ SpyIndexArbStrategy::SpyIndexArbStrategy(StrategyID strategyID, const std::strin
     Strategy(strategyID, strategyName, groupName),
     spy_instrument_(nullptr),
     rolling_delta_(50),          // rolling sigma window
-    z_score_threshold_(0.5),
+    z_score_threshold_(1.5),
     position_size_(100),
     debug_(false)
 {

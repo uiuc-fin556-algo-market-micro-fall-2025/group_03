@@ -189,6 +189,7 @@ private: /* from Strategy */
 private:
     void ExecuteTrade(double z);
     void SendOrder(const Instrument* instrument, int quantity, TradeDirection direction);
+    double ComputeMicroPrice(const Instrument& instrument) const;
 
     // Instruments
     const Instrument* spy_instrument_;
@@ -206,8 +207,8 @@ private:
 
     // Params
     double z_score_threshold_;
+    double max_z_;
     int position_size_;
-    bool debug_;
 };
 
 extern "C" {

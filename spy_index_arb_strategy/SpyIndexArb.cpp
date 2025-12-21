@@ -45,13 +45,14 @@ SpyIndexArbStrategy::SpyIndexArbStrategy(StrategyID strategyID, const std::strin
     spy_instrument_(nullptr),
     rolling_delta_(50),          // rolling sigma window
     z_score_threshold_(3),
-    position_size_(100),
-    debug_(false)
+    max_z_(6),
+    position_size_(100)
 {
-    weights_["NVDA"] = 0.0738;
-    weights_["MSFT"] = 0.0625;
-    weights_["AMZN"] = 0.0387;
-    weights_["GOOG"] = 0.0318;
+    weights_["AAPL"] = 0.0590;
+    weights_["MSFT"] = 0.0560;
+    weights_["AMZN"] = 0.0405;
+    weights_["GOOG"] = 0.0196;
+    weights_["NVDA"] = 0.0137;
 }
 
 SpyIndexArbStrategy::~SpyIndexArbStrategy()
@@ -86,26 +87,48 @@ void SpyIndexArbStrategy::RegisterForStrategyEvents(StrategyEventRegister* event
             underlyings_[sym] = p.second;
         }
     }
-    // for (InstrumentSetConstIter it = instrument_begin(); it != instrument_end(); ++it) {
-    //     if (it->second->symbol().compare("SPY")==0) {
-    //         spy_instrument = it->second;
-    //     }
-    // }
 }
 void SpyIndexArbStrategy::OnTrade(const TradeDataEventMsg& msg)
 {
-    const std::string& sym = msg.instrument().symbol();
-    double px = msg.trade().price();
+}
 
-    last_price_[sym] = px;
+double SpyIndexArbStrategy::ComputeMicroPrice(const Instrument& instrument) const
+{
+    const Quote& tq = instrument.top_quote();
 
-    if (!ref_price_.count(sym)) {
-        ref_price_[sym] = px;
-    }
+    double bid = tq.bid();
+    double ask = tq.ask();
+    int bid_sz = tq.bid_size();
+    int ask_sz = tq.ask_size();
+
+    if (bid > 0 && ask > 0 && bid_sz > 0 && ask_sz > 0) 
+        return (bid * ask_sz + ask * bid_sz) / static_cast<double>(bid_sz + ask_sz);
+
+    // Fallbacks
+    if (bid > 0 && ask > 0)
+        return 0.5 * (bid + ask);
+
+    if (instrument.last_trade().price() > 0)
+        return instrument.last_trade().price();
+
+    return 0.0;
 }
 
 void SpyIndexArbStrategy::OnTopQuote(const QuoteEventMsg& msg)
 {
+    const std::string& sym = msg.instrument().symbol();
+
+    double micro_price = ComputeMicroPrice(msg.instrument());
+
+    if (micro_price <= 0.0)
+        return;
+
+    last_price_[sym] = micro_price;
+
+    // Initialize reference price once
+    if (!ref_price_.count(sym)) {
+        ref_price_[sym] = micro_price;
+    }
 }
 
 void SpyIndexArbStrategy::OnQuote(const QuoteEventMsg& msg)
@@ -122,16 +145,16 @@ void SpyIndexArbStrategy::OnBar(const BarEventMsg& msg)
 
     // Ensure all prices exist
     if (!ref_price_.count("SPY")) return;
-    for (boost::unordered_map<std::string,double>::const_iterator it = weights_.begin(); it != weights_.end(); ++it)
-    {
-        if (!ref_price_.count(it->first)) return;
-    }
 
     // Compute R_under
+    double total_weight = 0.0;
     double r_under = 0.0;
     for (boost::unordered_map<std::string,double>::const_iterator it =
          weights_.begin(); it != weights_.end(); ++it)
     {
+        if (ref_price_.count(it->first)) total_weight += it->second;
+        else continue;
+
         const std::string& sym = it->first;
         double w = it->second;
 
@@ -140,13 +163,11 @@ void SpyIndexArbStrategy::OnBar(const BarEventMsg& msg)
 
         r_under += w * r;
     }
+    if (total_weight == 0.0) return;
 
     // Compute R_spy
     double r_spy =
         (last_price_["SPY"] - ref_price_["SPY"]) / ref_price_["SPY"];
-
-    double total_weight = 0.0;
-    for (auto& w : weights_) total_weight += w.second;
 
     double delta = r_under - total_weight * r_spy;
 
@@ -161,35 +182,37 @@ void SpyIndexArbStrategy::OnBar(const BarEventMsg& msg)
 
     double z = rolling_delta_.ZScore();
 
-    if (debug_) {
-        std::stringstream ss;
-        ss << "Delta=" << delta
-           << " Mean=" << rolling_delta_.Mean()
-           << " Z=" << z;
-        logger().LogToClient(LOGLEVEL_DEBUG, ss.str());
-    }
-
     ExecuteTrade(z);
-
 }
 
 void SpyIndexArbStrategy::ExecuteTrade(double z)
 {
     int target_position = 0;
+    double abs_z = std::fabs(z);
 
-    if (z > z_score_threshold_) {
-        target_position = position_size_;
-    } else if (z < -z_score_threshold_) {
-        target_position = -position_size_;
+    // No trade zone
+    if (abs_z <= z_score_threshold_) {
+        target_position = 0;
+    } else {
+        // Linear scaling between threshold and max_z
+        double scale =
+            (abs_z - z_score_threshold_) /
+            (max_z_ - z_score_threshold_);
+
+        // Cap scale at 1
+        if (scale > 1.0)
+            scale = 1.0;
+
+        int sized_position =
+            static_cast<int>(std::round(scale * position_size_));
+
+        target_position = (z > 0) ? sized_position : -sized_position;
     }
 
-    int current_pos = portfolio().position(spy_instrument_);
-    int size_needed = target_position - current_pos;
-
-    if (size_needed > 0) {
-        SendOrder(spy_instrument_, size_needed, TRADE_BUY);
-    } else if (size_needed < 0) {
-        SendOrder(spy_instrument_, -size_needed, TRADE_SELL);
+    if (target_position > 0) {
+        SendOrder(spy_instrument_, target_position, TRADE_BUY);
+    } else if (target_position < 0) {
+        SendOrder(spy_instrument_, -target_position, TRADE_SELL);
     }
 }
 
@@ -213,16 +236,6 @@ void SpyIndexArbStrategy::SendOrder(
             : instrument->last_trade().price();
     }
 
-    if (debug_) {
-        std::stringstream ss;
-        ss << "Sending "
-           << ((direction == TRADE_BUY) ? "BUY" : "SELL")
-           << " order for " << instrument->symbol()
-           << " at price " << price
-           << " and quantity " << quantity;
-        logger().LogToClient(LOGLEVEL_DEBUG, ss.str());
-    }
-
     OrderParams params(
         *instrument,
         quantity,
@@ -230,13 +243,11 @@ void SpyIndexArbStrategy::SendOrder(
         MARKET_CENTER_ID_IEX,
         side,
         ORDER_TIF_DAY,
-        ORDER_TYPE_MARKET
-        // ORDER_TYPE_MARKET_WITH_LEFTOVER_AS_LIMIT
+        ORDER_TYPE_LIMIT
     );
 
     trade_actions()->SendNewOrder(params);
 }
-
 
 void SpyIndexArbStrategy::OnOrderUpdate(const OrderUpdateEventMsg& msg)
 {    

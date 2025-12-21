@@ -161,7 +161,14 @@ to troubleshoot and overcome
 
 ## What we learned
 
-
+This project proved to be incredibly rewarding, we were able to work in a production environment with access to production
+level software like strategy studio. Here are some of the incredibly important skills we learned that will benefit us hugely 
+in industry:
+- Working with production level software like strategy studio
+- Working with real market pcaps from established exchanges
+- Significantly enhanced C++ skills
+- How to utilize ChatGPT effectively for software development projects
+- We learned a lot about basic trading algo developmewnt through our initial research
 
 ## Future improvements
 

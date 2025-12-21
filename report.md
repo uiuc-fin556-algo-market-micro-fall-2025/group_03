@@ -145,7 +145,16 @@ market cap weighted ETF should be done and is much more effective.
 
 ## Challenges
 
-
+We ran into numerous challenges throughout our development process. Here are some of the biggest ones we faced with some of the
+ways we solved them:
+- Unfamiliarity with linux command line
+    - ChatGPT helped a lot initially and after a lot of repetition we got a good hang of it
+- Inability to build and run strategies in strategy studio
+    - Look through the strategy studio documentation and header files, also update the bash scripts to correctly build and run our strategies
+- FIN556 VM constraints
+    - We had to symlink all of our files to our student_work directory to effectively use all of our resources
+- Issues correctly plotting PnL over time
+    - Had to code and use ChatGPT to correctly display dates on the x-axis while maintaining readability in the plots
 
 ## What we learned
 
@@ -153,3 +162,9 @@ market cap weighted ETF should be done and is much more effective.
 
 ## Future improvements
 
+For our index arbitrage strategies, there are definetly more improvements that could be made. Firstly, as mentioned in out
+analysis, we think it would be beneficial to focus development on the SPY index arb as opposed to working on DIA as price cap
+weighted gives us better chances of accurately predicting price changes. One clear optimization is to parse more holdings of
+SPY which will again give us an even more representative R_under. To make more mathematical optimizations, I think we would
+definetly have to do much more mathematical research, due to our limited math background we do not have a large amount of more
+mathematical optimizations.

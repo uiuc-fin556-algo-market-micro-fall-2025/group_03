@@ -33,7 +33,7 @@ SPYQQQDirectArbStrategy::SPYQQQDirectArbStrategy(StrategyID strategyID,
     qqq_instrument_(nullptr),
     beta_window_(50),            // rolling beta window (mean SPY/QQQ)
     spread_window_(50),          // rolling spread window for Z-score
-    z_score_threshold_(3.0),     // start conservative like you did for SPY index arb
+    z_score_threshold_(3.0),     // start conservative 
     max_z_(6.0),
     position_size_(100),
     debug_(false)

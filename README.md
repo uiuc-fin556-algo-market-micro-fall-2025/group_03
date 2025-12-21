@@ -29,6 +29,8 @@ python -m pip install datetime
 Additionally, the VENV_PY variable in the run_backtest.sh script within each strategy directory must be updated to the path of
 your python interpreter within the VENV_PY
 
+Within the plotting script, the plt.savefig should be updated to save the figure to the desired location
+
 ## Run a strategy
 
 To run a strategy, cd into one of the strategy directories and run the following
@@ -39,5 +41,11 @@ make
 ./run_backtest.sh --start-date YYYY-MM-DD --end-date YYYY-MM-DD
 ```
 
-This will build the object files for the strategy, initialize the strategy within strategy studio, and run the strategy
-across the desired dates
+This will build the object files for the strategy, initialize the strategy within strategy studio, run the strategy
+across the desired dates, as well as process the results into a CSV and plot the PnL results.
+
+## Results 
+
+Raw PnL and order data can be seen in the processed CSV files written to ss/bt/backtesting-cra-results/
+
+The PnL plot can also be viewed at whatever file location you specified in the PnL script

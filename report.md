@@ -6,7 +6,7 @@
 
 Email: ellisi2@illinois.edu
 
-LinkedIn: linkedin.com/in/ellis-irwin/
+LinkedIn: https://www.linkedin.com/in/ellis-irwin/
 
 I am a Master's student studying Computer Science at the University of Illinois Urbana-Champaing with a strong interest in
 low-level systems programming and computer architecture. I have previously completed a software engineering internship at
@@ -22,17 +22,26 @@ LinkedIn:
 
 ### Dev Desai
 
-Email: 
+Email: ddesa4@illinois.edu
 
-LinkedIn: 
+LinkedIn: https://www.linkedin.com/in/devvdesai/
 
-(description)
+I am a senior studying civil engineering at the University of Illinois at Urbana-Champaign. Currently I am focused on 
+structural engineering with a secondary focus in financial engineering. My recent professional experiences include interning 
+at Richard as a Project Engineering Intern and as an Analyst Intern at Lionchase North America.
 
 ## Preparation
 
 ### Initial strategy brainstorming
 
-TODO: Talk about maybe some more complex strategies that we initially brainstormed
+When we initially met, we had come up with multiple ideas on how we could tackle this project. The one that stuck out the most 
+was trading SPY based off of underlying stock movements and taking advantage of movement delay between tracking assets. These 
+two ideas seemed very similar, and those are the ideas that are presented in this report.
+
+Additionally, we also thought about another overnight drift algorithm, but we couldn’t come up with an idea that was different 
+then the idea that was talked about in this class. We also considered the possibility of utilizing an LLM, with AI becoming a 
+large topic in this class and using those LLMs to optimize simple trading strategies such as the moving average crossover trade, 
+or simple “read the news” trades on mega cap stocks. Finally, the last idea that we discussed was an Earnings drift trade.
 
 While we thought some of these more complex strategies would be cool, we moved away from them as none of us have super advanced
 math knowledge or coursework. Additionally, having never worked with Strategy Studio before, these strategies may have been too

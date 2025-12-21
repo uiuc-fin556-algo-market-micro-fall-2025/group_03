@@ -76,6 +76,15 @@ R_under = (7.38% * NVDA) + (6.25% * MSFT) + (3.87% * AMZN) + (2.55% * GOOG). We 
 R_spy = (7.38% + 6.25% + 3.87% + 2.55%) * SPY. Theoretically, R_under = R_spy, if R_under is larger, we can submit a buy order
 and if its smaller, we can submit a sell order to capitalize on discrepancies.
 
+The next optimization was to use z-scores instead of the direct price difference of R_under and R_spy. We could calculate
+delta = R_under - R_spy, if this delta was positive, that is a buy signal, and if negative, its a sell signal. We could then
+maintain a rolling window of previous delta values and calculate the z-score of the newest delta in relation to previous ones.
+If this delta is above our z-score threshold, then we would execute our buy or sell order.
+
+We next realized that our pricing of instruments by just using last trade price was not very accurate, we should use some
+price between the best bid and ask. For this, we decided to update our price for each stock on every OnTopQuote event, and
+we calculated the weighted mid-price of the stock, this gave us a much more accurate price representation of each instrument
+
 
 
 #### SPY Index arbitrage
@@ -89,6 +98,8 @@ and if its smaller, we can submit a sell order to capitalize on discrepancies.
 ##### Results
 
 ##### Analysis
+
+Less liquid, we dont have the accurate basket weights (price weighted)
 
 
 

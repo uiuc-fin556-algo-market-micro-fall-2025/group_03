@@ -44,7 +44,7 @@ SpyIndexArbStrategy::SpyIndexArbStrategy(StrategyID strategyID, const std::strin
     Strategy(strategyID, strategyName, groupName),
     spy_instrument_(nullptr),
     rolling_delta_(50),          // rolling sigma window
-    z_score_threshold_(1.5),
+    z_score_threshold_(3),
     position_size_(100),
     debug_(false)
 {
@@ -231,6 +231,7 @@ void SpyIndexArbStrategy::SendOrder(
         side,
         ORDER_TIF_DAY,
         ORDER_TYPE_MARKET
+        // ORDER_TYPE_MARKET_WITH_LEFTOVER_AS_LIMIT
     );
 
     trade_actions()->SendNewOrder(params);

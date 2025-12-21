@@ -91,6 +91,8 @@ we calculated the weighted mid-price of the stock, this gave us a much more accu
 
 ##### Results
 
+![](SPY_pnl_6month.png)
+
 ##### Analysis
 
 #### DIA Index arbitrage

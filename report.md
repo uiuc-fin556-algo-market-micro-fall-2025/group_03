@@ -64,7 +64,8 @@ that we needed for our strategies.
 The first strategy that we implemented was an index arbitrage strategy for SPY (that we later repurposed to compare with DIA). 
 
 Due to none of us having any significant strategy studio, we started with a very basic strategy that would be easiest to
-implement and build on that to make it more complex
+implement and build on that to make it more complex. Each of the following optimizations were build out one at a time to
+slowly progress and improve out strategy.
 
 Our first step was to receive data for just SPY and MSFT and whenever there was a trade on MSFT, we would replicate the same
 trade on SPY. At a basic level this is correct, if people are buying MSFT, and MSFT is a holding within SPY, then SPY should
@@ -84,6 +85,11 @@ If this delta is above our z-score threshold, then we would execute our buy or s
 We next realized that our pricing of instruments by just using last trade price was not very accurate, we should use some
 price between the best bid and ask. For this, we decided to update our price for each stock on every OnTopQuote event, and
 we calculated the weighted mid-price of the stock, this gave us a much more accurate price representation of each instrument
+
+Next, we implemented dynamic position sizing. Currently, whenever our z-score is above the threshold we place an order of
+the same size, this means that a z-score of 1.5 and 10 would both take the same position. We modified this to scale the
+position size with the magnitude of the z-score, allowing us to caplitalize more on high z-scores and reduce risk on lower
+z-scores.
 
 
 
@@ -112,3 +118,12 @@ Less liquid, we dont have the accurate basket weights (price weighted)
 #### SPY/SPX arbitrage
 
 #### DIA/DJIA arbitrage
+
+
+
+## What we learned
+
+
+
+## Future improvements
+

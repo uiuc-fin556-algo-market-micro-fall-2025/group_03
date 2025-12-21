@@ -99,13 +99,25 @@ gave us a larger percentage of the SPY basket, giving us a more accurate R_under
 
 #### SPY Index arbitrage
 
+We implemented the index arbitrage strategy outlined above for SPY, the results and analysis are below.
+
 ##### Results
 
 ![](SPY_pnl_6month.png)
 
 ##### Analysis
 
+Ignoring the the last month, our strategy performs quite well bouncing around 0 PnL sometimes going positive. This shows we
+have at least a decent algorithm that decently calculates R_under and provides us with good arbitrage opportunities. 
+
+We do however see the returns go very negative and very spikey in June. We are not entirely sure as to why this happens but
+one potential fix for this we thought could be beneficial would be to add stop losses. This would liquidate positions before
+large price changes, which could maybe eliminate these PnL spikes and improve returns.
+
 #### DIA Index arbitrage
+
+For DIA index arbitrage, we copied the code from our SPY index arb and just modified the instrument used and their weights
+to represent a DIA arb.
 
 ##### Results
 
@@ -113,15 +125,25 @@ gave us a larger percentage of the SPY basket, giving us a more accurate R_under
 
 ##### Analysis
 
-Less liquid, we dont have the accurate basket weights (price weighted)
+In our results here for DIA, we see much less readable results, with it jumping up and down incredible frequently.
 
+This jumpiness could be due to the lower liquidity of DIA. Additionally, we were unable to get very accurate weights to use
+for our arbitrage. Since DIA is price weighted as opposed to market cap weighted, the percentage makeup of DIA is much more
+volatile. I was able to find some weights of holdings from previous years and it was clear that the weights were significantly
+different to the weights we see today. We unofortunately could not find any weights from near the backtesting period that we
+were running, so it is very likely that the weights we used are not representative of the actual composition of DIA
 
+Due to the price weightedness of DIA and its issues explained above, we believe that running an index arb on SPY or some other 
+market cap weighted ETF should be done and is much more effective.
 
 ### Direct arbitrage
 
 #### SPY/SPX arbitrage
 
 #### DIA/DJIA arbitrage
+
+
+## Challenges
 
 
 

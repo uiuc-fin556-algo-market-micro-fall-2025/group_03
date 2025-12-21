@@ -63,11 +63,32 @@ that we needed for our strategies.
 
 The first strategy that we implemented was an index arbitrage strategy for SPY (that we later repurposed to compare with DIA). 
 
-Due to none of us having any significant strategy studio, we started with very basic 
+Due to none of us having any significant strategy studio, we started with a very basic strategy that would be easiest to
+implement and build on that to make it more complex
+
+Our first step was to receive data for just SPY and MSFT and whenever there was a trade on MSFT, we would replicate the same
+trade on SPY. At a basic level this is correct, if people are buying MSFT, and MSFT is a holding within SPY, then SPY should
+go up, meaining we should purchase SPY. This is obviously a crude approximation though.
+
+The next optimization we took was to use the last trade price as the price of the last stock and use the largest holdings
+within SPY to calculate a theoretical price for SPY using weighted averages. For example, we started with the following: 
+R_under = (7.38% * NVDA) + (6.25% * MSFT) + (3.87% * AMZN) + (2.55% * GOOG). We can then also calculate 
+R_spy = (7.38% + 6.25% + 3.87% + 2.55%) * SPY. Theoretically, R_under = R_spy, if R_under is larger, we can submit a buy order
+and if its smaller, we can submit a sell order to capitalize on discrepancies.
+
+
 
 #### SPY Index arbitrage
 
+##### Results
+
+##### Analysis
+
 #### DIA Index arbitrage
+
+##### Results
+
+##### Analysis
 
 
 

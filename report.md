@@ -91,7 +91,11 @@ the same size, this means that a z-score of 1.5 and 10 would both take the same 
 position size with the magnitude of the z-score, allowing us to caplitalize more on high z-scores and reduce risk on lower
 z-scores.
 
+Another small tweak we changed was the type of orders we were placing. Instead of placing market orders, we used market
+with leftover as limit to prevent our orders from climbing down from the top of book to unfavorable prices.
 
+Lastly, we used the IEX market data parser mentioned in the previous section to parse more of the holdings of SPY. This
+gave us a larger percentage of the SPY basket, giving us a more accurate R_under and therfore better deltas.
 
 #### SPY Index arbitrage
 

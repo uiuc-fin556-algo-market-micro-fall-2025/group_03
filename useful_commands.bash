@@ -1,5 +1,7 @@
 # List number of text tick data files for each ticker
 ls /mnt/2tbnvme/text_tick_data/tick_* | sed -E 's#.*/tick_(.+?)_.+.#\1#' | sort | uniq -c | sort -k2
+ls ~/ss/bt/text_tick_data/tick_* | sed -E 's#.*/tick_(.+?)_.+.#\1#' | sort | uniq -c | sort -k2
+ls ~/iexdownloaderparser/data/text_tick_data/tick_* | sed -E 's#.*/tick_(.+?)_.+.#\1#' | sort | uniq -c | sort -k2
 
 # Soft link local text_tick_data to the directory with our text_tick_data
 unlink ~/ss/bt/text_tick_data

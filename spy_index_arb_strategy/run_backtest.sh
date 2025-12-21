@@ -81,6 +81,10 @@ cd "$HOME/ss/bt/backtesting-cra-exports"
 latestPnL=$(ls -t *pnl* | head -1)
 tail -1 "$latestPnL"
 
+# VENV_PY="$HOME/venvs/pnl_plot/bin/python"
+
+# "$VENV_PY" plot_pnl.py "$latestPnL"
+
 # Generate portfolio metric
 # cd /home/vagrant/Desktop/strategy_studio/backtesting/utilities
 # python /home/vagrant/Desktop/strategy_studio/localdev/RCM/StrategyStudio/examples/fin566_fall_2020_group_three/metrics/calc_metric.py 

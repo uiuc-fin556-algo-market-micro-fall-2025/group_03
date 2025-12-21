@@ -3,3 +3,4 @@
 *.o
 
 dia_index_arb_strategy
+.venv

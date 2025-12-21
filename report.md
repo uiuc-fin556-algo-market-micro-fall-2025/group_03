@@ -156,6 +156,9 @@ ways we solved them:
 - Issues correctly plotting PnL over time
     - Had to code and use ChatGPT to correctly display dates on the x-axis while maintaining readability in the plots
 
+There are likely many other large challenges we ran into that I missed in addition to numerous smaller challenges that we had
+to troubleshoot and overcome
+
 ## What we learned
 
 

@@ -12,4 +12,4 @@ ln -s <text_tick_file> ~/ss/bt/text_tick_data/
 # Run backtest
 ./run_backtest.sh --start-date 2019-09-13 --end-date 2019-09-13
 ./run_backtest.sh --start-date 2023-01-03 --end-date 2023-01-03
-./run_backtest.sh --start-date 2022-08-01 --end-date 2023-08-01
+./run_backtest.sh --start-date 2023-01-09 --end-date 2023-01-13

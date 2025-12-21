@@ -8,17 +8,17 @@ Email: ellisi2@illinois.edu
 
 LinkedIn: https://www.linkedin.com/in/ellis-irwin/
 
-I am a Master's student studying Computer Science at the University of Illinois Urbana-Champaing with a strong interest in
+I am a Master's student studying Computer Science at the University of Illinois Urbana-Champaign with a strong interest in
 low-level systems programming and computer architecture. I have previously completed a software engineering internship at
 Millennium Management where I learned to apply my computer science skills to financial markets.
 
 ### David Adam
 
-Email: 
+Email: dadam7@illinois.edu
 
-LinkedIn: 
+LinkedIn: www.linkedin.com/in/david-adam5 
 
-(description)
+I am a senior Systems Engineering student with a secondary field in Computer Science in Financial Technology at the University of Illinois at Urbana-Champaign. I have a strong interest in automation and business workflow optimization and my previous experiences have consisted of being an AI & Workflow Development Intern at Employment BOOST and an IT & Automation Intern at Consolidated Hospitality Supplies.
 
 ### Dev Desai
 

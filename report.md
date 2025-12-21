@@ -99,6 +99,8 @@ we calculated the weighted mid-price of the stock, this gave us a much more accu
 
 ##### Results
 
+![](DIA_pnl_6month.png)
+
 ##### Analysis
 
 Less liquid, we dont have the accurate basket weights (price weighted)

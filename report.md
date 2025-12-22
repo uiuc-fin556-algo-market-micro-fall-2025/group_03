@@ -147,7 +147,26 @@ market cap weighted ETF should be done and is much more effective.
 
 ### Direct Arbitrage
 
+Beyond our previous index arbitrage strategies, we additionally implemented a direct arbitrage strategy between SPY and QQQ. Differently from index arbitrage, which attempted to rebuild theoretical value from its constituents, the direct strategy focused on relative mispricing between the two correlated ETFs of SPY and QQQ that track overlapping segments of the U.S equity market.
+
+SPY and QQQ are both heavily traded and highly liquid ETFs with significant overlap in large-cap technology holdings. This made them an ideal pair for relative-value trading. Assuming we are working with an efficient market, the price movements of SPY and QQQ are expected to be closely connected. However, as a result of differences in liquidity and overflow, short-lived deviations can occur, which can be observed below.
+
+Our strategy modeled the relationship mentioned previously through a rolling beta calculation between SPY and QQQ through the use of micropriced based data. The spread was equivalent to the SPY subtracted by a multiple of the rolling beta and QQQ.
+
+With the use of Strategy Studios rolling window functionanlity, the rolling window of the spread was maintained and the computation of a z-score was implemented in order to track how extreme the current deviation was relative to recent history. When the established threshold of the absolute z-score was exceeded, a potential arbitrage opportunity was identified. 
+
+We solely exectued trades in SPY, rather than trading both legs and QQQ operated as a reference throughout the strategy. This was a simplification that supported shorter execution logic and transaction costs.
+
+Additionally, from the very first iteration of this strategy, many market microstructure-aware components were incorporated:
+
+- Prices were derived from size-weighted microprices, rather than reliance on last trade prices
+- Market quality filters were implemented, including bid-ask spread thresholds and minimum top-of-book depth
+- Passive limit pricing was used to reduce spread crossing costs for submitting orders
+- A cooldown mechanism and hysterisis thresholds were added in an attempt to reduce signal churn and overtrading
+
 #### SPY/QQQ Arbitrage
+
+We implemented the SPY/QQQ direct arbitrage strategy depicted in the content in the previous section with performance and analysis following.
 
 ##### Results
 
@@ -155,6 +174,9 @@ market cap weighted ETF should be done and is much more effective.
 
 #### Analysis
 
+The six-month backtest of the SPY/QQQ direct arbitrage strategy provided a gradual and consistent downward drop in cumulative PnL, with a multitude of sharp drawdowns. Even if the overall loss in the results was not catastrophic, the strategy still failed to generate sustained profitability during the six months with the presence of occassional large negative spikes during elevated volatility.
+
+The results of this strategy highlighted several valuable market microstructure realities. Short-term price deviations between highly liquid ETFs such as SPY and QQQ are often driven by noise and liquidity effects. Even with our z-score computations and execution logic, transaction costs and adverse selection still had a large impact on performance, especially when hit by periods of elevated volatility. Trading SPY using QQQ as a reference introduced residual directional risk and demonstrated the difficulty of relying on direct arbitrage strategies when a market is acting highly efficient.
 
 ## Challenges
 

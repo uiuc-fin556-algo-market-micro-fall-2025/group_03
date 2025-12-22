@@ -197,7 +197,7 @@ to troubleshoot and overcome.
 ## Skills & Lessons Learned
 
 This project proved to be incredibly rewarding as we were able to work in a production environment with access to production
-level software like Strategy Studio. Here are some of the incredibly important skills we learned that will benefit us hugely 
+level software like Strategy Studio. Through the development of both the index arbitrage strategies and the direct arbitrage strategy, experience with the limitations of trading in real market microstructure was gained and below are some of the incredibly important skills we learned that will benefit us hugely 
 in industry:
 - Working with production level software like Strategy Studio
 - Working with real market PCAPs from established exchanges
@@ -213,3 +213,7 @@ weighted, gives us better chances of accurately predicting price changes. One cl
 SPY which will again give us an even more representative R_under. To make more mathematical optimizations, I think we would
 definitely have to do much more mathematical research, due to our limited math background we do not have a large amount of more
 mathematical optimizations.
+
+For the direct arbitrage strategy, future work would be targeted around the reduction of transaction cost and directional risk effects. Improvements could include stronger execution logic, adapting z-score thresholds, or adjusting trade frequency to prepare for periods of elevated volatility. As mentioned previously, improving this strategy would require deeper mathematical modeling and statistical analysis and is the next best step for continued development of our project.
+
+Combined all together, the results of our three strategies demonstrated the intracacies of design and execution in market microstructure-driven trading. The index arbitrage strategies were focused on theoretical pricing accuracy while the direct arbitrage strategies demonstrated the vital components of liquidty, spread dynamics, and execution timing. Adaptive thresholds, risk controls, and longer backtesting would be the main targets of future improvements and we look forward to build on our foundation for quantitative development.

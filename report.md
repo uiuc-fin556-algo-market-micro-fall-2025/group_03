@@ -16,7 +16,7 @@ Millennium Management where I learned to apply my computer science skills to fin
 
 Email: dadam7@illinois.edu
 
-LinkedIn:[](https://www.linkedin.com/in/david-adam5/)
+LinkedIn: [](www.linkedin.com/in/david-adam5/)
 
 I am a senior Systems Engineering student with a secondary field in Computer Science (Financial Technology) at the University of Illinois at Urbana-Champaign. I have a strong interest in automation and business workflow optimization and my previous professional experiences have consisted of working as an AI & Workflow Development Intern at Employment BOOST and as an IT & Automation Intern at Consolidated Hospitality Supplies.
 

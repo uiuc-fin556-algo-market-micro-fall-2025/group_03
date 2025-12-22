@@ -39,7 +39,7 @@ SPYQQQDirectArbStrategy::SPYQQQDirectArbStrategy(StrategyID strategyID,
     position_size_(100),
     debug_(false),
 
-    // NEW: hysteresis defaults
+    // hysteresis defaults
     z_enter_(3.0),     // keep same as old threshold
     z_exit_(1.2),      // exit earlier to avoid churn
     in_trade_(false),
@@ -230,7 +230,7 @@ void SPYQQQDirectArbStrategy::ExecuteTrade(double z)
 {
     double abs_z = std::fabs(z);
 
-    // --- NEW: hysteresis gate ---
+    // --- hysteresis gate ---
     if (!in_trade_) {
         // only enter when signal is strong
         if (abs_z < z_enter_) {
@@ -251,7 +251,7 @@ void SPYQQQDirectArbStrategy::ExecuteTrade(double z)
         }
     }
 
-    // --- existing sizing logic (unchanged) ---
+    // --- sizing logic ---
     int target_position = 0;
 
     double scale =

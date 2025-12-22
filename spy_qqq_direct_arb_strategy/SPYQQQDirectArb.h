@@ -87,7 +87,7 @@ private:
     int position_size_;
     bool debug_;
 
-    // NEW: hysteresis (reduce boundary churn)
+    // hysteresis (reduce boundary churn)
     double z_enter_;   // enter only when |z| >= z_enter_
     double z_exit_;    // exit only when |z| <= z_exit_
     bool in_trade_;    // state flag

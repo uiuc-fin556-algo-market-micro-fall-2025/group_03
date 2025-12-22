@@ -3,7 +3,7 @@
 # Base project path
 PROJECT_DIR="$HOME/ss/sdk/RCM/StrategyStudio/group_03_project"
 # Strategy folder name
-STRATEGY_NAME="spy_direct_index_arb_strategy"
+STRATEGY_NAME="spy_qqq_direct_arb_strategy"
 # Full strategy path
 STRATEGY_DIR="$PROJECT_DIR/$STRATEGY_NAME"
 # Instance name

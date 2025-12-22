@@ -18,6 +18,7 @@
 #include <math.h>
 #include <iostream>
 #include <cassert>
+#include <algorithm>
 
 using namespace RCM::StrategyStudio;
 using namespace RCM::StrategyStudio::MarketModels;
@@ -36,7 +37,20 @@ SPYQQQDirectArbStrategy::SPYQQQDirectArbStrategy(StrategyID strategyID,
     z_score_threshold_(3.0),     // start conservative 
     max_z_(6.0),
     position_size_(100),
-    debug_(false)
+    debug_(false),
+
+    // NEW: hysteresis defaults
+    z_enter_(3.0),     // keep same as old threshold
+    z_exit_(1.2),      // exit earlier to avoid churn
+    in_trade_(false),
+
+    // microstructure defaults
+    max_spread_bps_(2.0),
+    min_top_size_(100),
+    use_passive_exec_(true),
+    price_improve_ticks_(1),
+    cooldown_bars_(2),
+    bars_since_trade_(1000000)
 {
 }
 
@@ -49,6 +63,10 @@ void SPYQQQDirectArbStrategy::OnResetStrategyState()
     last_price_.clear();
     beta_window_.clear();
     spread_window_.clear();
+    bars_since_trade_ = 1000000;
+
+    // NEW
+    in_trade_ = false;
 }
 
 void SPYQQQDirectArbStrategy::DefineStrategyParams()
@@ -88,11 +106,9 @@ double SPYQQQDirectArbStrategy::ComputeMicroPrice(const Instrument& instrument) 
     int bid_sz = tq.bid_size();
     int ask_sz = tq.ask_size();
 
-    // Microprice: size-weighted mid
     if (bid > 0 && ask > 0 && bid_sz > 0 && ask_sz > 0)
         return (bid * ask_sz + ask * bid_sz) / static_cast<double>(bid_sz + ask_sz);
 
-    // Fallbacks
     if (bid > 0 && ask > 0)
         return 0.5 * (bid + ask);
 
@@ -106,7 +122,6 @@ void SPYQQQDirectArbStrategy::OnTopQuote(const QuoteEventMsg& msg)
 {
     const std::string& sym = msg.instrument().symbol();
 
-    // Only care about SPY and QQQ
     if (sym != "SPY" && sym != "QQQ")
         return;
 
@@ -117,12 +132,43 @@ void SPYQQQDirectArbStrategy::OnTopQuote(const QuoteEventMsg& msg)
     last_price_[sym] = micro_price;
 }
 
-void SPYQQQDirectArbStrategy::OnQuote(const QuoteEventMsg& msg)
+void SPYQQQDirectArbStrategy::OnQuote(const QuoteEventMsg& msg) {}
+void SPYQQQDirectArbStrategy::OnDepth(const MarketDepthEventMsg& msg) {}
+
+bool SPYQQQDirectArbStrategy::MarketQualityOk() const
 {
+    if (!spy_instrument_ || !qqq_instrument_)
+        return false;
+
+    const Quote& s = spy_instrument_->top_quote();
+    const Quote& q = qqq_instrument_->top_quote();
+
+    auto ok_one = [&](const Quote& tq) -> bool {
+        double bid = tq.bid();
+        double ask = tq.ask();
+        int bsz = tq.bid_size();
+        int asz = tq.ask_size();
+
+        if (bid <= 0.0 || ask <= 0.0 || ask <= bid)
+            return false;
+
+        if (bsz < min_top_size_ || asz < min_top_size_)
+            return false;
+
+        double mid = 0.5 * (bid + ask);
+        double spr = ask - bid;
+        double spr_bps = (spr / mid) * 10000.0;
+
+        return spr_bps <= max_spread_bps_;
+    };
+
+    return ok_one(s) && ok_one(q);
 }
 
-void SPYQQQDirectArbStrategy::OnDepth(const MarketDepthEventMsg& msg)
+double SPYQQQDirectArbStrategy::GetTickSize(const Instrument* instrument) const
 {
+    (void)instrument;
+    return 0.01;
 }
 
 void SPYQQQDirectArbStrategy::OnBar(const BarEventMsg& msg)
@@ -130,7 +176,8 @@ void SPYQQQDirectArbStrategy::OnBar(const BarEventMsg& msg)
     if (!spy_instrument_ || !qqq_instrument_)
         return;
 
-    // Need both microprices
+    bars_since_trade_++;
+
     if (!last_price_.count("SPY") || !last_price_.count("QQQ"))
         return;
 
@@ -140,7 +187,6 @@ void SPYQQQDirectArbStrategy::OnBar(const BarEventMsg& msg)
     if (p_spy <= 0.0 || p_qqq <= 0.0)
         return;
 
-    // Update rolling beta ~= mean(SPY/QQQ)
     double beta = p_spy / p_qqq;
     beta_window_.push_back(beta);
 
@@ -149,15 +195,19 @@ void SPYQQQDirectArbStrategy::OnBar(const BarEventMsg& msg)
 
     double beta_hat = beta_window_.Mean();
 
-    // Spread (direct arb): SPY - beta_hat * QQQ
     double spread = p_spy - beta_hat * p_qqq;
-
     spread_window_.push_back(spread);
 
     if (!spread_window_.full())
         return;
 
     if (orders().num_working_orders() > 0)
+        return;
+
+    if (!MarketQualityOk())
+        return;
+
+    if (bars_since_trade_ < cooldown_bars_)
         return;
 
     double z = spread_window_.ZScore();
@@ -168,7 +218,8 @@ void SPYQQQDirectArbStrategy::OnBar(const BarEventMsg& msg)
            << " p_qqq=" << p_qqq
            << " beta_hat=" << beta_hat
            << " spread=" << spread
-           << " z=" << z;
+           << " z=" << z
+           << " in_trade=" << (in_trade_ ? "1" : "0");
         logger().LogToClient(LOGLEVEL_DEBUG, ss.str());
     }
 
@@ -177,29 +228,42 @@ void SPYQQQDirectArbStrategy::OnBar(const BarEventMsg& msg)
 
 void SPYQQQDirectArbStrategy::ExecuteTrade(double z)
 {
-    // We trade SPY only (simple execution); signal is relative pricing vs QQQ.
-    int target_position = 0;
     double abs_z = std::fabs(z);
 
-    // No-trade zone
-    if (abs_z <= z_score_threshold_) {
-        target_position = 0;
+    // --- NEW: hysteresis gate ---
+    if (!in_trade_) {
+        // only enter when signal is strong
+        if (abs_z < z_enter_) {
+            return;
+        }
+        in_trade_ = true;
     } else {
-        // Scale between threshold and max_z
-        double scale =
-            (abs_z - z_score_threshold_) /
-            (max_z_ - z_score_threshold_);
-
-        if (scale > 1.0)
-            scale = 1.0;
-
-        int sized_position =
-            static_cast<int>(std::round(scale * position_size_));
-
-        // If spread is positive (z>0): SPY rich -> SELL SPY
-        // If spread is negative (z<0): SPY cheap -> BUY SPY
-        target_position = (z > 0) ? -sized_position : sized_position;
+        // only exit when signal meaningfully decays
+        if (abs_z <= z_exit_) {
+            int current_pos = portfolio().position(spy_instrument_);
+            if (current_pos > 0) {
+                SendOrder(spy_instrument_, current_pos, TRADE_SELL);
+            } else if (current_pos < 0) {
+                SendOrder(spy_instrument_, -current_pos, TRADE_BUY);
+            }
+            in_trade_ = false;
+            return;
+        }
     }
+
+    // --- existing sizing logic (unchanged) ---
+    int target_position = 0;
+
+    double scale =
+        (abs_z - z_enter_) /
+        (max_z_ - z_enter_);
+
+    if (scale > 1.0) scale = 1.0;
+
+    int sized_position =
+        static_cast<int>(std::round(scale * position_size_));
+
+    target_position = (z > 0) ? -sized_position : sized_position;
 
     int current_pos = portfolio().position(spy_instrument_);
     int size_needed = target_position - current_pos;
@@ -219,17 +283,37 @@ void SPYQQQDirectArbStrategy::SendOrder(
     OrderSide side =
         (direction == TRADE_BUY) ? ORDER_SIDE_BUY : ORDER_SIDE_SELL;
 
-    double price = 0.0;
+    const Quote& tq = instrument->top_quote();
+    double bid = tq.bid();
+    double ask = tq.ask();
 
-    if (direction == TRADE_BUY) {
-        price = (instrument->top_quote().ask() != 0)
-            ? instrument->top_quote().ask()
-            : instrument->last_trade().price();
+    double price = 0.0;
+    double tick = GetTickSize(instrument);
+
+    if (!use_passive_exec_) {
+        if (direction == TRADE_BUY) {
+            price = (ask != 0) ? ask : instrument->last_trade().price();
+        } else {
+            price = (bid != 0) ? bid : instrument->last_trade().price();
+        }
     } else {
-        price = (instrument->top_quote().bid() != 0)
-            ? instrument->top_quote().bid()
-            : instrument->last_trade().price();
+        if (bid > 0.0 && ask > 0.0 && ask > bid) {
+            if (direction == TRADE_BUY) {
+                double px = bid + price_improve_ticks_ * tick;
+                price = std::min(px, ask);
+            } else {
+                double px = ask - price_improve_ticks_ * tick;
+                price = std::max(px, bid);
+            }
+        } else {
+            price = (instrument->last_trade().price() > 0.0)
+                ? instrument->last_trade().price()
+                : 0.0;
+        }
     }
+
+    if (price <= 0.0)
+        return;
 
     OrderParams params(
         *instrument,
@@ -242,16 +326,10 @@ void SPYQQQDirectArbStrategy::SendOrder(
     );
 
     trade_actions()->SendNewOrder(params);
+
+    bars_since_trade_ = 0;
 }
 
-void SPYQQQDirectArbStrategy::OnOrderUpdate(const OrderUpdateEventMsg& msg)
-{
-}
-
-void SPYQQQDirectArbStrategy::OnStrategyCommand(const StrategyCommandEventMsg& msg)
-{
-}
-
-void SPYQQQDirectArbStrategy::OnParamChanged(StrategyParam& param)
-{
-}
+void SPYQQQDirectArbStrategy::OnOrderUpdate(const OrderUpdateEventMsg& msg) {}
+void SPYQQQDirectArbStrategy::OnStrategyCommand(const StrategyCommandEventMsg& msg) {}
+void SPYQQQDirectArbStrategy::OnParamChanged(StrategyParam& param) {}

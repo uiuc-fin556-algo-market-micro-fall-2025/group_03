@@ -65,6 +65,10 @@ private: // Helpers
     void SendOrder(const Instrument* instrument, int quantity, TradeDirection direction);
     double ComputeMicroPrice(const Instrument& instrument) const;
 
+    // microstructure filters + execution
+    bool MarketQualityOk() const;
+    double GetTickSize(const Instrument* instrument) const;
+
 private:
     // Instruments
     const Instrument* spy_instrument_;
@@ -77,11 +81,24 @@ private:
     Analytics::ScalarRollingWindow<double> beta_window_;   // mean(SPY/QQQ)
     Analytics::ScalarRollingWindow<double> spread_window_; // z-score on spread
 
-    // Params
+    // Params (signal)
     double z_score_threshold_;
     double max_z_;
     int position_size_;
     bool debug_;
+
+    // NEW: hysteresis (reduce boundary churn)
+    double z_enter_;   // enter only when |z| >= z_enter_
+    double z_exit_;    // exit only when |z| <= z_exit_
+    bool in_trade_;    // state flag
+
+    // microstructure-aware execution + gating
+    double max_spread_bps_;        // don't trade if either ETF spread > this (bps of mid)
+    int min_top_size_;             // require top-of-book size >= this on bid AND ask
+    bool use_passive_exec_;        // if true: improve inside spread instead of crossing
+    int price_improve_ticks_;      // number of ticks inside the spread
+    int cooldown_bars_;            // simple throttle to avoid churning
+    int bars_since_trade_;
 };
 
 extern "C" {
@@ -103,13 +120,11 @@ extern "C" {
         }
     }
 
-    // must match an existing user within the system
     _STRATEGY_EXPORTS const char* GetAuthor()
     {
         return "dlariviere";
     }
 
-    // must match an existing trading group within the system
     _STRATEGY_EXPORTS const char* GetAuthorGroup()
     {
         return "UIUC";

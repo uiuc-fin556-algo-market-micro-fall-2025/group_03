@@ -1,5 +1,7 @@
 # FIN556 Group 3 Project Report
 
+Setup instructions to run out strategies is in setup.md
+
 ## Team Members
 
 ### Ellis Irwin (Team Leader)

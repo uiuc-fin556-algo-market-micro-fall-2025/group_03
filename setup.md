@@ -1,8 +1,6 @@
-# group_03_project
+# group_03_project environment setup
 
-Our report is located in report.md
-
-Within the README, we outline how to set up the strategy studio environment to run our strategies
+Our report is located in our README.md
 
 ## Setup to run our strategies
 
